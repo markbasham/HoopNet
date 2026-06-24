@@ -330,16 +330,16 @@ def hoopmini(x):
     if not isinstance(network, Network):
         network = Network('Creeper')
         print("Making new creeper")
-    network.simulated_annealing(itterations=2000, changes_per_itteration=8, heat=1.0, heat_prob=0.1, printout=False)
+    network.simulated_annealing(itterations=1000, changes_per_itteration=8, heat=1.0, heat_prob=0.1, printout=False)
     return (network, network.evaluate_all_training_data(printout=False))
 
 if __name__ == '__main__':
     from multiprocessing import Pool
-    epoc_number = 1000
+    epoc_number = 100
     result = [(1,1)] * epoc_number
     best_results = []
 
-    for i in range(10):
+    for i in range(20):
     
         with Pool(10) as p:
             result = sorted(p.map(hoopmini, result),key=lambda x: x[1])
@@ -352,4 +352,5 @@ if __name__ == '__main__':
     sorted_best = sorted(best_results,key=lambda x: x[1])
     print(sorted_best)
     print(sorted_best[-1][0])
+    sorted_best[-1][0].evaluate_all_training_data()
     
