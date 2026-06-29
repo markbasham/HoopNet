@@ -146,7 +146,7 @@ class Network():
         h3w3 = WeightHoop('hidden_3_weight_3', attach_to=[h3r])
         h3w4 = WeightHoop('hidden_3_weight_4', attach_to=[h3r])
         
-        o1 = OutputHoop('Forward', attach_to=[h1w1,h2w1,h3w1])
+        o1 = OutputHoop('Forward', attach_to=[h1w1,h2w1,h3w1]) # Could be generalised later
         o2 = OutputHoop('Left', attach_to=[h1w2,h2w2,h3w2])
         o3 = OutputHoop('Right', attach_to=[h1w3,h2w3,h3w3])
         o4 = OutputHoop('Explode', attach_to=[h1w4,h2w4,h3w4])
@@ -261,12 +261,20 @@ class Network():
         return score + (np.array(self.get_hoop_parameters())==[0]).sum()*25
     
     def evaluate_all_training_data(self, printout=True):
-        score = 0
+        decision_score = 0
+        hoop_score = 0
+        correct_decisions = 0
         for outcome, position in self.training_data:
-            score += self.get_rated_decision(position, outcome)
-            score -= self.score_hoop_parameters()*0.0001
+            decision_score += self.get_rated_decision(position, outcome)
+            hoop_score -= self.score_hoop_parameters()*0.0001
             if printout:
-                print(outcome + "  " +str(position) + "  " + self.get_decision(position) + "  " + str(score))
+                decision = self.get_decision(position)
+                print("At " + str(position) + " the decision should be " + outcome + ". It is " + decision + ", status " + str(outcome==decision) + ".")
+                if decision == outcome:
+                    correct_decisions += 1
+        score = decision_score + hoop_score
+        if printout:
+            print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " + str(decision_score) + ", hoop score " + str(hoop_score) + ", total score " + str(score))
         return score
 
     def mutate_and_accept(self, itterations=1, changes_per_itteration=1, printout=True):
@@ -339,18 +347,18 @@ if __name__ == '__main__':
     result = [(1,1)] * epoc_number
     best_results = []
 
-    for i in range(20):
+    for i in range(1):
     
         with Pool(12) as p:
             result = sorted(p.map(hoopmini, result),key=lambda x: x[1])
 
-        print(result[-10:])
+        #print(result[-10:])
+        print("Iteration "+str(i+1)+" completed")
         best_results += result[-10:]
         result = result[int(-epoc_number/4):] + result[int(-epoc_number/4):] + [(1,1)] * (int(epoc_number/2))
 
     print("Final result")
     sorted_best = sorted(best_results,key=lambda x: x[1])
-    print(sorted_best)
+    #print(sorted_best)
     print(sorted_best[-1][0])
     sorted_best[-1][0].evaluate_all_training_data()
-    
