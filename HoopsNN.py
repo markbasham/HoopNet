@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import csv
 
 class Hoop():
     def __init__(self, name, attach_to=[]):
@@ -90,7 +91,7 @@ class OutputHoop(Hoop):
 
 
 class Network():
-    def __init__(self, name):
+    def __init__(self, name, training_data):
         self.name = name
         self.hoops = []
         self.input_hoops = []
@@ -100,17 +101,7 @@ class Network():
         self.initialise_networks()
         self.set_input_parameters(self.input_values)
         self.set_hoop_parameters(self.hoop_values)
-        self.training_data = [('Forward',(-2,4)), ('Forward',(-1,4)), ('Forward',(0,4)), ('Forward',(1,4)), ('Forward',(2,4)),
-                              ('Forward',(-2,3)),('Forward',(-1,3)),('Forward',(0,3)),('Forward',(1,3)),('Forward',(2,3)),
-                              ('Left',(-2,2)),('Left',(-1,2)),('Forward',(0,2)),('Right',(1,2)),('Right',(2,2)),
-                              ('Left',(-2,1)),('Explode',(-1,1)),('Explode',(0,1)),('Explode',(1,1)),('Right',(2,1)),
-                              ('Left',(-2,0)),('Explode',(-1,0)),('Explode',(0,0)),('Explode',(1,0)),('Right',(2,0)),
-                              ('Left',(-2,-1)),('Left',(-1,-1)),('Left',(0,-1)),('Right',(1,-1)),('Right',(2,-1)),
-                              ('Left',(-2,-2)),('Left',(-1,-2)),('Left',(0,-2)),('Right',(1,-2)),('Right',(2,-2)),
-                              ('Left',(-2,-3)),('Left',(-1,-3)),('Left',(0,-3)),('Right',(1,-3)),('Right',(2,-3)),
-                             ]
-                              
-        
+        self.training_data = training_data
     
     def initialise_networks(self):
         ix = InputHoop('inputX')
@@ -146,10 +137,10 @@ class Network():
         h3w3 = WeightHoop('hidden_3_weight_3', attach_to=[h3r])
         h3w4 = WeightHoop('hidden_3_weight_4', attach_to=[h3r])
         
-        o1 = OutputHoop('Forward', attach_to=[h1w1,h2w1,h3w1]) # Could be generalised later
-        o2 = OutputHoop('Left', attach_to=[h1w2,h2w2,h3w2])
-        o3 = OutputHoop('Right', attach_to=[h1w3,h2w3,h3w3])
-        o4 = OutputHoop('Explode', attach_to=[h1w4,h2w4,h3w4])
+        o1 = OutputHoop('Action 1', attach_to=[h1w1,h2w1,h3w1])
+        o2 = OutputHoop('Action 2', attach_to=[h1w2,h2w2,h3w2])
+        o3 = OutputHoop('Action 3', attach_to=[h1w3,h2w3,h3w3])
+        o4 = OutputHoop('Action 4', attach_to=[h1w4,h2w4,h3w4])
         
         self.input_hoops.append(ix)
         self.input_hoops.append(iy)
@@ -274,7 +265,7 @@ class Network():
                     correct_decisions += 1
         score = decision_score + hoop_score
         if printout:
-            print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " + str(decision_score) + ", hoop score " + str(hoop_score) + ", total score " + str(score))
+            print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " + str(decision_score) + ", hoop score " + str(round(hoop_score,2)) + ", total score " + str(round(score,2)))
         return score
 
     def mutate_and_accept(self, itterations=1, changes_per_itteration=1, printout=True):
@@ -328,29 +319,55 @@ class Network():
             result += (hoop.__str__()+'\n')
         return result
 
+def get_training_data(data_filename):
+    from pathlib import Path
+    base = Path(__file__).parent
+    training_file = base / "training_data" / data_filename
+    training_data = []
 
-def hoopmini(x):
+    with open(training_file, newline="") as f:
+        reader = csv.reader(f,delimiter=';')
+        rows = list(reader)
+
+    x_values = [int(x.strip()) for x in rows[len(rows)-1][1:]]
+
+    for row in rows[:-1]:
+        y = int(row[0].strip())
+        for x, cell in zip(x_values, row[1:]):
+            action_number = int(cell.strip())
+            training_data.append(("Action " + str(action_number), (x, y)))
+
+    return training_data
+
+def hoopmini(x, training_data):
     network = None
     try:
         network = x[0]
     except:
         pass
     if not isinstance(network, Network):
-        network = Network('Creeper')
+        network = Network('Creeper', training_data)
         #print("Making new creeper")
     network.simulated_annealing(itterations=100, changes_per_itteration=8, heat=1.0, heat_prob=0.1, printout=False)
     return (network, network.evaluate_all_training_data(printout=False))
 
 if __name__ == '__main__':
+
+    network_type = 'Steve' # Steve or Creeper
+    training_data_version = 'Ranged' # Evade or Ranged for Steve or Default for Creeper
+
     from multiprocessing import Pool
+    from functools import partial
     epoc_number = 40
     result = [(1,1)] * epoc_number
     best_results = []
+    training_data = get_training_data('TrainingData_' + network_type + "_" + str(training_data_version) + ".CSV")
+    partial_hoopmini = partial(hoopmini, training_data=training_data)
 
     for i in range(1):
     
         with Pool(12) as p:
-            result = sorted(p.map(hoopmini, result),key=lambda x: x[1])
+            result = sorted(p.map(partial_hoopmini, result),key=lambda x: x[1])
 
         #print(result[-10:])
         print("Iteration "+str(i+1)+" completed")
