@@ -96,8 +96,9 @@ class Network():
         self.hoops = []
         self.input_hoops = []
         self.output_hoops = []
+        self.parameter_hoops = []
         self.input_values = [0,0]
-        self.hoop_values = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
+        self.hoop_values = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
         self.initialise_networks()
         self.set_input_parameters(self.input_values)
         self.set_hoop_parameters(self.hoop_values)
@@ -180,7 +181,9 @@ class Network():
         self.output_hoops.append(o3)
         self.output_hoops.append(o4)
 
-        self.set_hoop_parameters(np.random.randint(-1,6,24))
+        self.parameter_hoops = [hoop for hoop in self.hoops if not isinstance(hoop,SumHoop)]
+
+        self.set_hoop_parameters(np.random.randint(-1,6,21))
     
     def set_input_parameters(self, parameters):
         count = 0
@@ -190,14 +193,14 @@ class Network():
             
     def set_hoop_parameters(self, parameters):
         count = 0
-        for hoop in self.hoops:
+        for hoop in self.parameter_hoops:
             hoop.set_parameter(parameters[count])
             self.hoop_values[count] = parameters[count]
             count += 1
 
     def get_hoop_parameters(self):
         parameters = []
-        for hoop in self.hoops:
+        for hoop in self.parameter_hoops:
             parameters += [hoop.get_parameter()]
         return parameters
 
@@ -274,7 +277,7 @@ class Network():
             original_score = self.evaluate_all_training_data(printout=False)
             for j in range(changes_per_itteration):
                 #pick a random hoop
-                random_hoop = random.choice(self.hoops)
+                random_hoop = random.choice(self.parameter_hoops)
                 random_hoop.modify_parameter(random.randint(-2,2))
             new_score = self.evaluate_all_training_data(printout=False)
             if new_score > original_score:
@@ -284,13 +287,13 @@ class Network():
                 #print("Reverting                old score is " + str(original_score))
                 self.set_hoop_parameters(original_hoop_values)
 
-    def simulated_annealing(self, itterations=1, changes_per_itteration=1, heat=1.0, heat_prob=0.1, printout=True):
+    def simulated_annealing(self, itterations=100, changes_per_itteration=5, heat=1.0, heat_prob=0.1, printout=True):
         original_hoop_values = self.get_hoop_parameters()
         original_score = self.evaluate_all_training_data(printout=False)    
         for i in range(itterations):
             for j in range(changes_per_itteration):
                 #pick a random hoop
-                random_hoop = random.choice(self.hoops)
+                random_hoop = random.choice(self.parameter_hoops)
                 random_hoop.modify_parameter(random.randint(-2,2))
             new_score = self.evaluate_all_training_data(printout=False)
             if new_score > original_score:
@@ -354,17 +357,17 @@ def hoopmini(x, training_data):
 if __name__ == '__main__':
 
     network_type = 'Steve' # Steve or Creeper
-    training_data_version = 'Ranged' # Evade or Ranged for Steve or Default for Creeper
+    training_data_version = 'Evade' # Evade or Ranged for Steve or Default for Creeper
 
     from multiprocessing import Pool
     from functools import partial
-    epoc_number = 40
+    epoc_number = 100
     result = [(1,1)] * epoc_number
     best_results = []
     training_data = get_training_data('TrainingData_' + network_type + "_" + str(training_data_version) + ".CSV")
     partial_hoopmini = partial(hoopmini, training_data=training_data)
 
-    for i in range(1):
+    for i in range(2):
     
         with Pool(12) as p:
             result = sorted(p.map(partial_hoopmini, result),key=lambda x: x[1])
