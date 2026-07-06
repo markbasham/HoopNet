@@ -44,12 +44,21 @@ class InputHoop(Hoop):
     def __init__(self, name, attach_to=[]):
         Hoop.__init__(self, name, attach_to)
 
+    def calculate_value(self):
+        self.hoop_result = self.parameter
+
     def get_output(self):
         return self.parameter
 
 class WeightHoop(Hoop):
     def __init__(self, name, attach_to=[]):
         Hoop.__init__(self, name, attach_to)
+
+    def calculate_value(self):
+        result = 0
+        for hoop in self.links_from:
+            result += hoop.hoop_result
+        self.hoop_result = result * self.parameter
 
     def get_output(self):
         result = 0
@@ -61,6 +70,12 @@ class SumHoop(Hoop):
     def __init__(self, name, attach_to=[]):
         Hoop.__init__(self, name, attach_to)
 
+    def calculate_value(self):
+        result = 0
+        for hoop in self.links_from:
+            result += hoop.hoop_result
+        self.hoop_result = result
+
     def get_output(self):
         result = 0
         for hoop in self.links_from:
@@ -70,6 +85,14 @@ class SumHoop(Hoop):
 class ReluHoop(Hoop):
     def __init__(self, name, attach_to=[]):
         Hoop.__init__(self, name, attach_to)
+
+    def calculate_value(self):
+        result = self.parameter
+        for hoop in self.links_from:
+            result += hoop.hoop_result
+        if result < 0 :
+            result = 0
+        self.hoop_result = result
 
     def get_output(self):
         result = self.parameter
@@ -83,6 +106,12 @@ class OutputHoop(Hoop):
     def __init__(self, name, attach_to=[]):
         Hoop.__init__(self, name, attach_to)
 
+    def calculate_value(self):
+        result = 0
+        for hoop in self.links_from:
+            result += hoop.hoop_result
+        self.hoop_result = result
+
     def get_output(self):
         result = 0
         for hoop in self.links_from:
@@ -91,18 +120,23 @@ class OutputHoop(Hoop):
 
 
 class Network():
-    def __init__(self, name, training_data):
+    def __init__(self, name, training_data, algorithm):
         self.name = name
-        self.hoops = []
+        self.hoops = [] # must be an ordered list in order of evaluation
         self.input_hoops = []
         self.output_hoops = []
         self.parameter_hoops = []
         self.input_values = [0,0]
         self.hoop_values = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
         self.initialise_networks()
-        self.set_input_parameters(self.input_values)
         self.set_hoop_parameters(self.hoop_values)
+        self.set_input_parameters(self.input_values)
         self.training_data = training_data
+        self.training_algorithms = {
+            "simulated annealing": self.simulated_annealing,
+            "mutate and accept": self.mutate_and_accept
+        }
+        self.algorithm = self.training_algorithms[str(algorithm)]
     
     def initialise_networks(self):
         ix = InputHoop('inputX')
@@ -190,6 +224,7 @@ class Network():
         for hoop in self.input_hoops:
             hoop.set_parameter(parameters[count])
             count += 1
+        self.calculate_network()
             
     def set_hoop_parameters(self, parameters):
         count = 0
@@ -203,15 +238,26 @@ class Network():
         for hoop in self.parameter_hoops:
             parameters += [hoop.get_parameter()]
         return parameters
+    
+    def calculate_network(self,printout=False):
+        for hoop in self.input_hoops:
+            hoop.calculate_value()
+        for hoop in self.hoops:
+            hoop.calculate_value()
+        for hoop in self.output_hoops:
+            hoop.calculate_value()
+        if printout:
+            print([hoop.name + " has " + str(hoop.parameter) + " is " + str(hoop.hoop_result) + " / " for hoop in self.input_hoops + self.hoops + self.output_hoops])
 
     def get_scores(self, hoops):
         scores = {}
         for hoop in hoops:
-            scores[hoop.name] = hoop.get_output()
+            scores[hoop.name] = hoop.hoop_result
         return scores     
 
     def get_outputs(self, input_values):
         self.set_input_parameters(input_values)
+        self.calculate_network()
         return self.get_scores(self.output_hoops)
 
     def get_decision(self, input_values):
@@ -248,7 +294,7 @@ class Network():
             #print(result)
             return result
 
-    def score_hoop_parameters(self, printout=True):
+    def score_hoop_parameters(self):
         # score the square of the quantities, i.e. make large numbers more expencive
         score = (np.array(self.get_hoop_parameters())**2).sum()
         # Also increase the score of zeros, so there arnt as many in the overall mix as they will be boring to calculate
@@ -270,8 +316,21 @@ class Network():
         if printout:
             print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " + str(decision_score) + ", hoop score " + str(round(hoop_score,2)) + ", total score " + str(round(score,2)))
         return score
+    
+    def full_evaluation(self):
+        decision_score = 0
+        hoop_score = 0
+        correct_decisions = 0
+        for outcome, position in self.training_data:
+            decision_score += self.get_rated_decision(position, outcome)
+            hoop_score -= self.score_hoop_parameters()*0.0001
+            if self.get_decision(position) == outcome:
+                correct_decisions += 1
+        score = decision_score + hoop_score
+        number_of_zeros = (np.array(self.get_hoop_parameters())==[0]).sum()
+        return (score, decision_score, hoop_score, correct_decisions, number_of_zeros)
 
-    def mutate_and_accept(self, itterations=1, changes_per_itteration=1, printout=True):
+    def mutate_and_accept(self, itterations=1, changes_per_itteration=1, printout=False):
         for i in range(itterations):
             original_hoop_values = self.get_hoop_parameters()
             original_score = self.evaluate_all_training_data(printout=False)
@@ -287,7 +346,7 @@ class Network():
                 #print("Reverting                old score is " + str(original_score))
                 self.set_hoop_parameters(original_hoop_values)
 
-    def simulated_annealing(self, itterations=100, changes_per_itteration=5, heat=1.0, heat_prob=0.1, printout=True):
+    def simulated_annealing(self, itterations=100, changes_per_itteration=5, heat=1.0, heat_prob=0.1, printout=False):
         original_hoop_values = self.get_hoop_parameters()
         original_score = self.evaluate_all_training_data(printout=False)    
         for i in range(itterations):
@@ -342,43 +401,56 @@ def get_training_data(data_filename):
 
     return training_data
 
-def hoopmini(x, training_data):
+def hoopmini(x, training_data, algorithm):
     network = None
     try:
         network = x[0]
     except:
         pass
     if not isinstance(network, Network):
-        network = Network('Creeper', training_data)
+        network = Network('Creeper', training_data, algorithm)
         #print("Making new creeper")
-    network.simulated_annealing(itterations=100, changes_per_itteration=8, heat=1.0, heat_prob=0.1, printout=False)
+    network.algorithm()
     return (network, network.evaluate_all_training_data(printout=False))
 
 if __name__ == '__main__':
 
-    network_type = 'Steve' # Steve or Creeper
-    training_data_version = 'Evade' # Evade or Ranged for Steve or Default for Creeper
+    # Training Data
+    network_type = 'Creeper' # Steve or Creeper
+    training_data_version = 'Default' # Evade or Ranged for Steve or Default for Creeper
+
+    # Generational parameters
+    epoc_number = 100 # number of networks in each generation
+    epoc_frac = 0.5 # fraction of networks in a new generation which are carried over from the previous generation
+    generations = 15 # number of generations
+
+    # Algorithm parameters
+    algorithm = "simulated annealing" # mutate and accept or simulated annealing
+
+    import time
+    start_time = time.time()
 
     from multiprocessing import Pool
     from functools import partial
-    epoc_number = 100
     result = [(1,1)] * epoc_number
     best_results = []
     training_data = get_training_data('TrainingData_' + network_type + "_" + str(training_data_version) + ".CSV")
-    partial_hoopmini = partial(hoopmini, training_data=training_data)
+    partial_hoopmini = partial(hoopmini, training_data=training_data, algorithm=algorithm)
 
-    for i in range(2):
+    for i in range(generations):
     
         with Pool(12) as p:
             result = sorted(p.map(partial_hoopmini, result),key=lambda x: x[1])
 
         #print(result[-10:])
-        print("Iteration "+str(i+1)+" completed")
         best_results += result[-10:]
-        result = result[int(-epoc_number/4):] + result[int(-epoc_number/4):] + [(1,1)] * (int(epoc_number/2))
+        print("Generation " + str(i+1) + " completed, best score is " + str(round(best_results[-1][1])) + ".")
+        result = result[int(-epoc_number*epoc_frac/2):] + result[int(-epoc_number*epoc_frac/2):] + [(1,1)] * (int(epoc_number-2*int(epoc_number*epoc_frac/2)))
 
-    print("Final result")
+    #print("Final result")
     sorted_best = sorted(best_results,key=lambda x: x[1])
     #print(sorted_best)
     print(sorted_best[-1][0])
     sorted_best[-1][0].evaluate_all_training_data()
+
+    print("--- %s seconds ---" % (round(time.time() - start_time,4)))
