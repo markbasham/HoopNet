@@ -134,7 +134,8 @@ class Network():
         self.training_data = training_data
         self.training_algorithms = {
             "simulated annealing": self.simulated_annealing,
-            "mutate and accept": self.mutate_and_accept
+            "mutate and accept": self.mutate_and_accept,
+            "simulated annealing with cooling": self.simulated_annealing_with_cooling
         }
         self.algorithm = self.training_algorithms[str(algorithm)]
     
@@ -290,7 +291,8 @@ class Network():
             index = list(scores.keys()).index(desired_outcome)
             #print("Not the best result - desired outcome is "+desired_outcome)
             #print(index)
-            result = list(scores.values())[index] - list(scores.values())[max_indexes[0]]
+            result = -abs(list(scores.values())[index] - list(scores.values())[max_indexes[0]]) * 1.2 - 1
+            # factor of 1.2 penalises bad decisions more, -1 offset also punishes all outputs are 0
             #print(result)
             return result
 
@@ -306,28 +308,29 @@ class Network():
         correct_decisions = 0
         for outcome, position in self.training_data:
             decision_score += self.get_rated_decision(position, outcome)
-            hoop_score -= self.score_hoop_parameters()*0.0001
+            hoop_score -= self.score_hoop_parameters()*0.00001
             if printout:
                 decision = self.get_decision(position)
                 print("At " + str(position) + " the decision should be " + outcome + ". It is " + decision + ", status " + str(outcome==decision) + ".")
                 if decision == outcome:
                     correct_decisions += 1
         score = decision_score + hoop_score
-        if printout:
-            print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " + str(decision_score) + ", hoop score " + str(round(hoop_score,2)) + ", total score " + str(round(score,2)))
         return score
     
-    def full_evaluation(self):
+    def full_evaluation(self, printout=True):
         decision_score = 0
         hoop_score = 0
         correct_decisions = 0
         for outcome, position in self.training_data:
             decision_score += self.get_rated_decision(position, outcome)
-            hoop_score -= self.score_hoop_parameters()*0.0001
+            hoop_score -= self.score_hoop_parameters()*0.00001
             if self.get_decision(position) == outcome:
                 correct_decisions += 1
         score = decision_score + hoop_score
         number_of_zeros = (np.array(self.get_hoop_parameters())==[0]).sum()
+        if printout:
+            print(str(correct_decisions) + " out of " + str(len(self.training_data)) + " decisions were correct. Decision score " 
+                  + str(decision_score) + ", hoop score " + str(round(hoop_score,2)) + ", number of zeros " + str(number_of_zeros) + ", total score " + str(round(score,2)) + ".")
         return (score, decision_score, hoop_score, correct_decisions, number_of_zeros)
 
     def mutate_and_accept(self, itterations=1, changes_per_itteration=1, printout=False):
@@ -346,15 +349,21 @@ class Network():
                 #print("Reverting                old score is " + str(original_score))
                 self.set_hoop_parameters(original_hoop_values)
 
-    def simulated_annealing(self, itterations=100, changes_per_itteration=5, heat=1.0, heat_prob=0.1, printout=False):
+    def simulated_annealing(self, itterations=200, changes_per_itteration=1, heat=1.0, heat_prob=0.1, printout=False, output=False):
         original_hoop_values = self.get_hoop_parameters()
-        original_score = self.evaluate_all_training_data(printout=False)    
+        original_score = self.evaluate_all_training_data(printout=False)
+        if output:
+            score_evolution = []
+        else:
+            score_evolution = None     
         for i in range(itterations):
             for j in range(changes_per_itteration):
                 #pick a random hoop
                 random_hoop = random.choice(self.parameter_hoops)
                 random_hoop.modify_parameter(random.randint(-2,2))
             new_score = self.evaluate_all_training_data(printout=False)
+            if output:
+                score_evolution += [original_score]
             if new_score > original_score:
                 original_hoop_values = self.get_hoop_parameters()
                 original_score = new_score 
@@ -369,6 +378,38 @@ class Network():
                 else:
                     #print("Reverting                old score is " + str(original_score))
                     self.set_hoop_parameters(original_hoop_values)
+
+        return  score_evolution
+
+    def simulated_annealing_with_cooling(self, itterations=200, changes_per_itteration=1, temperature=0.4, cooling_rate=0.96, printout=False, output=False):
+        original_hoop_values = self.get_hoop_parameters()
+        original_score = self.evaluate_all_training_data(printout=False)
+        if output:
+            score_evolution = []
+        else:
+            score_evolution = None    
+        for i in range(itterations):
+            for j in range(changes_per_itteration):
+                random_hoop = random.choice(self.parameter_hoops)
+                random_hoop.modify_parameter(random.randint(-2,2))
+            new_score = self.evaluate_all_training_data(printout=False)
+            if output:
+                score_evolution += [original_score]
+            if printout:
+                print("New score " + str(round(new_score,2)) + ", old score " + str(round(original_score,2)) + 
+                      ", prob " + str(round(np.exp(-(original_score-new_score)/temperature),5)) + " temperature " + str(round(temperature,3)) + ".")
+            if new_score > original_score:
+                original_hoop_values = self.get_hoop_parameters()
+                original_score = new_score 
+            else :
+                if random.random() < np.exp(-(original_score-new_score)/temperature):
+                    original_hoop_values = self.get_hoop_parameters()
+                    original_score = new_score
+                else:
+                    self.set_hoop_parameters(original_hoop_values)
+            temperature *= cooling_rate
+
+        return  score_evolution
 
     def obj_func(self, x):
         self.set_hoop_parameters(np.asarray(x, dtype=np.int16))
@@ -401,6 +442,40 @@ def get_training_data(data_filename):
 
     return training_data
 
+def simulated_annealing_with_cooling_test(network,test_number, itterations=100, changes_per_itteration=5, temperature=0.5, cooling_rate=0.95, printout=True):
+    test_scores = []
+    import copy
+    for i in range(test_number):
+        test = copy.deepcopy(network)
+        test_scores.append(test.simulated_annealing_with_cooling(itterations, changes_per_itteration, temperature, cooling_rate, False, True))
+    test_scores = np.array(test_scores)
+    average = test_scores.mean(axis=0)
+    x = np.arange(len(average))
+
+    import matplotlib.pyplot as plt   
+    plt.plot(x,average,label=f"{changes_per_itteration}, {temperature}, {cooling_rate}")
+    plt.xlabel("Iteration")
+    plt.ylabel("Score")
+    plt.legend(loc='upper left')
+    plt.show(block=False)
+
+def simulated_annealing_test(network,test_number, itterations=100, changes_per_itteration=5, heat=1.0, heat_prob=0.1, printout=True):
+    test_scores = []
+    import copy
+    for i in range(test_number):
+        test = copy.deepcopy(network)
+        test_scores.append(test.simulated_annealing(itterations, changes_per_itteration, heat, heat_prob, False, True))
+    test_scores = np.array(test_scores)
+    average = test_scores.mean(axis=0)
+    x = np.arange(len(average))
+
+    import matplotlib.pyplot as plt   
+    plt.plot(x,average,label=f"{changes_per_itteration}, {heat}, {heat_prob}")
+    plt.xlabel("Iteration")
+    plt.ylabel("Score")
+    plt.legend(loc='upper left')
+    plt.show(block=False)
+
 def hoopmini(x, training_data, algorithm):
     network = None
     try:
@@ -413,19 +488,20 @@ def hoopmini(x, training_data, algorithm):
     network.algorithm()
     return (network, network.evaluate_all_training_data(printout=False))
 
-if __name__ == '__main__':
-
-    # Training Data
-    network_type = 'Creeper' # Steve or Creeper
-    training_data_version = 'Default' # Evade or Ranged for Steve or Default for Creeper
+def main(network_type="Creeper",training_data_version="Default"):
 
     # Generational parameters
-    epoc_number = 100 # number of networks in each generation
-    epoc_frac = 0.5 # fraction of networks in a new generation which are carried over from the previous generation
-    generations = 15 # number of generations
+    epoc_number = 150 #number of networks in each generation
+    epoc_frac = 0.4 # fraction of networks in a new generation which are carried over from the previous generation
+    epoc_frac_schedule = True # turn on change of epoc_frac with generation
+    generations = 10 # number of generations
 
     # Algorithm parameters
-    algorithm = "simulated annealing" # mutate and accept or simulated annealing
+    algorithm = "simulated annealing with cooling" # mutate and accept / simulated annealing / simulated annealing with cooling
+    #algorithm = "simulated annealing"
+
+    # Configure epoc_frac_schedule if enabled
+    epoc_frac_final = 0.6 # final epoc_frac in the last generation, each generation in between interpolates linearly using epoc_frac as a starting value
 
     import time
     start_time = time.time()
@@ -436,6 +512,9 @@ if __name__ == '__main__':
     best_results = []
     training_data = get_training_data('TrainingData_' + network_type + "_" + str(training_data_version) + ".CSV")
     partial_hoopmini = partial(hoopmini, training_data=training_data, algorithm=algorithm)
+    epoc_frac_gradient = 0
+    if epoc_frac_schedule:
+        epoc_frac_gradient = (epoc_frac_final - epoc_frac) / generations
 
     for i in range(generations):
     
@@ -444,13 +523,34 @@ if __name__ == '__main__':
 
         #print(result[-10:])
         best_results += result[-10:]
-        print("Generation " + str(i+1) + " completed, best score is " + str(round(best_results[-1][1])) + ".")
+        print("Generation " + str(i+1) + " completed, best score is " + str(round(best_results[-1][1],2)) + ".")
         result = result[int(-epoc_number*epoc_frac/2):] + result[int(-epoc_number*epoc_frac/2):] + [(1,1)] * (int(epoc_number-2*int(epoc_number*epoc_frac/2)))
 
-    #print("Final result")
+        epoc_frac += epoc_frac_gradient
+
     sorted_best = sorted(best_results,key=lambda x: x[1])
-    #print(sorted_best)
-    print(sorted_best[-1][0])
+
+    print("Final result for a " + network_type + " network with the " + training_data_version + " map:")
+
+    sorted_best[-1][0].full_evaluation()
     sorted_best[-1][0].evaluate_all_training_data()
 
+    #print(sorted_best)
+    print(sorted_best[-1][0])  
+
     print("--- %s seconds ---" % (round(time.time() - start_time,4)))
+    
+    test = sorted_best[-1][0]
+    #simulated_annealing_with_cooling_test(test,70,200, 1, 0.5, 0.95)
+    #simulated_annealing_test(test,70, 200, 5, 1.0, 0.1)
+    print("The end.")
+
+    return sorted_best[-1][0]
+
+if __name__ == '__main__':
+
+    # Training Data
+    network_type = 'Steve' # Steve / Creeper
+    training_data_version = 'Ranged' # Evade / Ranged for Steve OR Default for Creeper
+
+    main(network_type,training_data_version)
