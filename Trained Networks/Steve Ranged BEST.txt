@@ -1,0 +1,158 @@
+Steve Ranged Result 2
+
+Final result for a Steve network with the Ranged map:
+
+121 out of 121 decisions were correct. Decision score 121, hoop score -0.15, number of zeros 0, total score 120.85
+
+At (-5, 10) the decision should be Action 2. It is Action 2, status True.
+At (-4, 10) the decision should be Action 2. It is Action 2, status True.
+At (-3, 10) the decision should be Action 2. It is Action 2, status True.
+At (-2, 10) the decision should be Action 2. It is Action 2, status True.
+At (-1, 10) the decision should be Action 2. It is Action 2, status True.
+At (0, 10) the decision should be Action 4. It is Action 4, status True.
+At (1, 10) the decision should be Action 3. It is Action 3, status True.
+At (2, 10) the decision should be Action 3. It is Action 3, status True.
+At (3, 10) the decision should be Action 3. It is Action 3, status True.
+At (4, 10) the decision should be Action 3. It is Action 3, status True.
+At (5, 10) the decision should be Action 3. It is Action 3, status True.
+At (-5, 9) the decision should be Action 2. It is Action 2, status True.
+At (-4, 9) the decision should be Action 2. It is Action 2, status True.
+At (-3, 9) the decision should be Action 2. It is Action 2, status True.
+At (-2, 9) the decision should be Action 2. It is Action 2, status True.
+At (-1, 9) the decision should be Action 2. It is Action 2, status True.
+At (0, 9) the decision should be Action 4. It is Action 4, status True.
+At (1, 9) the decision should be Action 3. It is Action 3, status True.
+At (2, 9) the decision should be Action 3. It is Action 3, status True.
+At (3, 9) the decision should be Action 3. It is Action 3, status True.
+At (4, 9) the decision should be Action 3. It is Action 3, status True.
+At (5, 9) the decision should be Action 3. It is Action 3, status True.
+At (-5, 8) the decision should be Action 2. It is Action 2, status True.
+At (-4, 8) the decision should be Action 2. It is Action 2, status True.
+At (-3, 8) the decision should be Action 2. It is Action 2, status True.
+At (-2, 8) the decision should be Action 2. It is Action 2, status True.
+At (-1, 8) the decision should be Action 2. It is Action 2, status True.
+At (0, 8) the decision should be Action 4. It is Action 4, status True.
+At (1, 8) the decision should be Action 3. It is Action 3, status True.
+At (2, 8) the decision should be Action 3. It is Action 3, status True.
+At (3, 8) the decision should be Action 3. It is Action 3, status True.
+At (4, 8) the decision should be Action 3. It is Action 3, status True.
+At (5, 8) the decision should be Action 3. It is Action 3, status True.
+At (-5, 7) the decision should be Action 2. It is Action 2, status True.
+At (-4, 7) the decision should be Action 2. It is Action 2, status True.
+At (-3, 7) the decision should be Action 2. It is Action 2, status True.
+At (-2, 7) the decision should be Action 2. It is Action 2, status True.
+At (-1, 7) the decision should be Action 2. It is Action 2, status True.
+At (0, 7) the decision should be Action 4. It is Action 4, status True.
+At (1, 7) the decision should be Action 3. It is Action 3, status True.
+At (2, 7) the decision should be Action 3. It is Action 3, status True.
+At (3, 7) the decision should be Action 3. It is Action 3, status True.
+At (4, 7) the decision should be Action 3. It is Action 3, status True.
+At (5, 7) the decision should be Action 3. It is Action 3, status True.
+At (-5, 6) the decision should be Action 2. It is Action 2, status True.
+At (-4, 6) the decision should be Action 2. It is Action 2, status True.
+At (-3, 6) the decision should be Action 2. It is Action 2, status True.
+At (-2, 6) the decision should be Action 2. It is Action 2, status True.
+At (-1, 6) the decision should be Action 2. It is Action 2, status True.
+At (0, 6) the decision should be Action 4. It is Action 4, status True.
+At (1, 6) the decision should be Action 3. It is Action 3, status True.
+At (2, 6) the decision should be Action 3. It is Action 3, status True.
+At (3, 6) the decision should be Action 3. It is Action 3, status True.
+At (4, 6) the decision should be Action 3. It is Action 3, status True.
+At (5, 6) the decision should be Action 3. It is Action 3, status True.
+At (-5, 5) the decision should be Action 2. It is Action 2, status True.
+At (-4, 5) the decision should be Action 2. It is Action 2, status True.
+At (-3, 5) the decision should be Action 2. It is Action 2, status True.
+At (-2, 5) the decision should be Action 2. It is Action 2, status True.
+At (-1, 5) the decision should be Action 2. It is Action 2, status True.
+At (0, 5) the decision should be Action 4. It is Action 4, status True.
+At (1, 5) the decision should be Action 3. It is Action 3, status True.
+At (2, 5) the decision should be Action 3. It is Action 3, status True.
+At (3, 5) the decision should be Action 3. It is Action 3, status True.
+At (4, 5) the decision should be Action 3. It is Action 3, status True.
+At (5, 5) the decision should be Action 3. It is Action 3, status True.
+At (-5, 4) the decision should be Action 2. It is Action 2, status True.
+At (-4, 4) the decision should be Action 2. It is Action 2, status True.
+At (-3, 4) the decision should be Action 2. It is Action 2, status True.
+At (-2, 4) the decision should be Action 2. It is Action 2, status True.
+At (-1, 4) the decision should be Action 2. It is Action 2, status True.
+At (0, 4) the decision should be Action 4. It is Action 4, status True.
+At (1, 4) the decision should be Action 3. It is Action 3, status True.
+At (2, 4) the decision should be Action 3. It is Action 3, status True.
+At (3, 4) the decision should be Action 3. It is Action 3, status True.
+At (4, 4) the decision should be Action 3. It is Action 3, status True.
+At (5, 4) the decision should be Action 3. It is Action 3, status True.
+At (-5, 3) the decision should be Action 2. It is Action 2, status True.
+At (-4, 3) the decision should be Action 2. It is Action 2, status True.
+At (-3, 3) the decision should be Action 2. It is Action 2, status True.
+At (-2, 3) the decision should be Action 2. It is Action 2, status True.
+At (-1, 3) the decision should be Action 2. It is Action 2, status True.
+At (0, 3) the decision should be Action 4. It is Action 4, status True.
+At (1, 3) the decision should be Action 3. It is Action 3, status True.
+At (2, 3) the decision should be Action 3. It is Action 3, status True.
+At (3, 3) the decision should be Action 3. It is Action 3, status True.
+At (4, 3) the decision should be Action 3. It is Action 3, status True.
+At (5, 3) the decision should be Action 3. It is Action 3, status True.
+At (-5, 2) the decision should be Action 2. It is Action 2, status True.
+At (-4, 2) the decision should be Action 2. It is Action 2, status True.
+At (-3, 2) the decision should be Action 2. It is Action 2, status True.
+At (-2, 2) the decision should be Action 2. It is Action 2, status True.
+At (-1, 2) the decision should be Action 2. It is Action 2, status True.
+At (0, 2) the decision should be Action 1. It is Action 1, status True.
+At (1, 2) the decision should be Action 3. It is Action 3, status True.
+At (2, 2) the decision should be Action 3. It is Action 3, status True.
+At (3, 2) the decision should be Action 3. It is Action 3, status True.
+At (4, 2) the decision should be Action 3. It is Action 3, status True.
+At (5, 2) the decision should be Action 3. It is Action 3, status True.
+At (-5, 1) the decision should be Action 2. It is Action 2, status True.
+At (-4, 1) the decision should be Action 2. It is Action 2, status True.
+At (-3, 1) the decision should be Action 2. It is Action 2, status True.
+At (-2, 1) the decision should be Action 2. It is Action 2, status True.
+At (-1, 1) the decision should be Action 2. It is Action 2, status True.
+At (0, 1) the decision should be Action 1. It is Action 1, status True.
+At (1, 1) the decision should be Action 3. It is Action 3, status True.
+At (2, 1) the decision should be Action 3. It is Action 3, status True.
+At (3, 1) the decision should be Action 3. It is Action 3, status True.
+At (4, 1) the decision should be Action 3. It is Action 3, status True.
+At (5, 1) the decision should be Action 3. It is Action 3, status True.
+At (-5, 0) the decision should be Action 2. It is Action 2, status True.
+At (-4, 0) the decision should be Action 2. It is Action 2, status True.
+At (-3, 0) the decision should be Action 2. It is Action 2, status True.
+At (-2, 0) the decision should be Action 2. It is Action 2, status True.
+At (-1, 0) the decision should be Action 2. It is Action 2, status True.
+At (0, 0) the decision should be Action 1. It is Action 1, status True.
+At (1, 0) the decision should be Action 3. It is Action 3, status True.
+At (2, 0) the decision should be Action 3. It is Action 3, status True.
+At (3, 0) the decision should be Action 3. It is Action 3, status True.
+At (4, 0) the decision should be Action 3. It is Action 3, status True.
+At (5, 0) the decision should be Action 3. It is Action 3, status True.
+121 out of 121 decisions were correct. Decision score 121, hoop score -0.15, total score 120.85
+ -> inputX (5) -> weightX1, weightX2, weightX3
+ -> inputY (0) -> weightY1, weightY2, weightY3
+inputX -> weightX1 (-4) -> hidden_1_sum
+inputX -> weightX2 (-1) -> hidden_2_sum
+inputX -> weightX3 (3) -> hidden_3_sum
+inputY -> weightY1 (2) -> hidden_1_sum
+inputY -> weightY2 (1) -> hidden_2_sum
+inputY -> weightY3 (4) -> hidden_3_sum
+weightX1, weightY1 -> hidden_1_sum (None) -> hidden_1_relu
+weightX2, weightY2 -> hidden_2_sum (None) -> hidden_2_relu
+weightX3, weightY3 -> hidden_3_sum (None) -> hidden_3_relu
+hidden_1_sum -> hidden_1_relu (1) -> hidden_1_weight_1, hidden_1_weight_2, hidden_1_weight_3, hidden_1_weight_4
+hidden_2_sum -> hidden_2_relu (2) -> hidden_2_weight_1, hidden_2_weight_2, hidden_2_weight_3, hidden_2_weight_4
+hidden_3_sum -> hidden_3_relu (-1) -> hidden_3_weight_1, hidden_3_weight_2, hidden_3_weight_3, hidden_3_weight_4
+hidden_1_relu -> hidden_1_weight_1 (1) -> Action 1
+hidden_1_relu -> hidden_1_weight_2 (4) -> Action 2
+hidden_1_relu -> hidden_1_weight_3 (-1) -> Action 3
+hidden_1_relu -> hidden_1_weight_4 (1) -> Action 4
+hidden_2_relu -> hidden_2_weight_1 (5) -> Action 1
+hidden_2_relu -> hidden_2_weight_2 (1) -> Action 2
+hidden_2_relu -> hidden_2_weight_3 (1) -> Action 3
+hidden_2_relu -> hidden_2_weight_4 (1) -> Action 4
+hidden_3_relu -> hidden_3_weight_1 (1) -> Action 1
+hidden_3_relu -> hidden_3_weight_2 (1) -> Action 2
+hidden_3_relu -> hidden_3_weight_3 (4) -> Action 3
+hidden_3_relu -> hidden_3_weight_4 (3) -> Action 4
+hidden_1_weight_1, hidden_2_weight_1, hidden_3_weight_1 -> Action 1 (None) -> 
+hidden_1_weight_2, hidden_2_weight_2, hidden_3_weight_2 -> Action 2 (None) -> 
+hidden_1_weight_3, hidden_2_weight_3, hidden_3_weight_3 -> Action 3 (None) -> 
+hidden_1_weight_4, hidden_2_weight_4, hidden_3_weight_4 -> Action 4 (None) ->
